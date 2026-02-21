@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -8,31 +9,19 @@ import (
 
 func TestLoadConfig_Valid(t *testing.T) {
 	content := `
-questions:
-  - title: "What did you do?"
-    type: free
-  - title: "How do you feel?"
-    type: single
-    options:
-      - Good
-      - Bad
+question_file: /path/to/questions.yaml
+output_path: /path/to/output/
 `
 	path := writeTempFile(t, content)
 	cfg, err := LoadConfig(path)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(cfg.Questions) != 2 {
-		t.Fatalf("expected 2 questions, got %d", len(cfg.Questions))
+	if cfg.QuestionFilePath != "/path/to/questions.yaml" {
+		t.Errorf("unexpected question_file: %q", cfg.QuestionFilePath)
 	}
-	if cfg.Questions[0].Type != FreeInput {
-		t.Errorf("expected FreeInput, got %q", cfg.Questions[0].Type)
-	}
-	if cfg.Questions[1].Type != SingleChoice {
-		t.Errorf("expected SingleChoice, got %q", cfg.Questions[1].Type)
-	}
-	if len(cfg.Questions[1].Options) != 2 {
-		t.Errorf("expected 2 options, got %d", len(cfg.Questions[1].Options))
+	if cfg.OutputPath != "/path/to/output/" {
+		t.Errorf("unexpected output_path: %q", cfg.OutputPath)
 	}
 }
 
@@ -43,41 +32,114 @@ func TestLoadConfig_FileNotFound(t *testing.T) {
 	}
 }
 
-func TestLoadConfig_MissingTitle(t *testing.T) {
-	content := `
+func TestLoadQuestions(t *testing.T) {
+	tests := []struct {
+		name      string
+		content   string
+		path      string // if set, used directly instead of a temp file
+		wantErr   bool
+		wantCount int
+	}{
+		{
+			name: "valid",
+			content: `
 questions:
-  - type: free
-`
-	path := writeTempFile(t, content)
-	_, err := LoadConfig(path)
-	if err == nil {
-		t.Fatal("expected validation error for missing title")
-	}
-}
-
-func TestLoadConfig_UnknownType(t *testing.T) {
-	content := `
-questions:
-  - title: "Question"
-    type: unknown
-`
-	path := writeTempFile(t, content)
-	_, err := LoadConfig(path)
-	if err == nil {
-		t.Fatal("expected validation error for unknown type")
-	}
-}
-
-func TestLoadConfig_SingleChoiceNoOptions(t *testing.T) {
-	content := `
-questions:
-  - title: "Question"
+  - title: "What did you do?"
+    type: free
+  - title: "How do you feel?"
     type: single
+    options:
+      - Good
+      - Bad
+`,
+			wantCount: 2,
+		},
+		{
+			name:    "file not found",
+			path:    "/nonexistent/path/questions.yaml",
+			wantErr: true,
+		},
+		{
+			name:    "missing title",
+			content: "questions:\n  - type: free\n",
+			wantErr: true,
+		},
+		{
+			name:    "unknown type",
+			content: "questions:\n  - title: \"Q\"\n    type: unknown\n",
+			wantErr: true,
+		},
+		{
+			name:    "single choice no options",
+			content: "questions:\n  - title: \"Q\"\n    type: single\n",
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			p := tc.path
+			if p == "" {
+				p = writeTempFile(t, tc.content)
+			}
+			qcfg, err := LoadQuestions(p)
+			if tc.wantErr {
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if tc.wantCount > 0 && len(qcfg.Questions) != tc.wantCount {
+				t.Errorf("expected %d questions, got %d", tc.wantCount, len(qcfg.Questions))
+			}
+		})
+	}
+}
+
+func TestLoadConfig_WithQuestionFilePath(t *testing.T) {
+	questions := `
+questions:
+  - title: "External question"
+    type: free
 `
-	path := writeTempFile(t, content)
-	_, err := LoadConfig(path)
-	if err == nil {
-		t.Fatal("expected validation error for single-choice with no options")
+	questionPath := writeTempFile(t, questions)
+
+	content := fmt.Sprintf(`question_file: %s`, questionPath)
+	cfgPath := writeTempFile(t, content)
+
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.QuestionFilePath != questionPath {
+		t.Errorf("unexpected question_file: %q", cfg.QuestionFilePath)
+	}
+
+	qcfg, err := LoadQuestions(cfg.QuestionFilePath)
+	if err != nil {
+		t.Fatalf("unexpected error loading questions: %v", err)
+	}
+	if len(qcfg.Questions) != 1 {
+		t.Fatalf("expected 1 question, got %d", len(qcfg.Questions))
+	}
+	if qcfg.Questions[0].Title != "External question" {
+		t.Errorf("unexpected question title: %q", qcfg.Questions[0].Title)
+	}
+}
+
+func TestLoadConfig_WithOutputPath(t *testing.T) {
+	dir := t.TempDir()
+	content := fmt.Sprintf(`output_path: %s`, dir)
+	cfgPath := writeTempFile(t, content)
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.OutputPath != dir {
+		t.Errorf("expected OutputPath %q, got %q", dir, cfg.OutputPath)
 	}
 }
 
