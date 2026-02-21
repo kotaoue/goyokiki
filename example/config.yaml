@@ -1,0 +1,20 @@
+questions:
+  - title: "今日やったこと"
+    type: free
+
+  - title: "気分はどうですか"
+    type: single
+    options:
+      - よい
+      - ふつう
+      - わるい
+
+  - title: "明日やること"
+    type: free
+
+  - title: "優先度"
+    type: single
+    options:
+      - 高
+      - 中
+      - 低
