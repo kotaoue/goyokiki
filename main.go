@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 const defaultConfigPath = "config.yaml"
@@ -26,5 +27,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Print(GenerateMarkdown(answers))
+	filename, err := WriteMarkdownFile(answers, time.Now())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Fprintf(os.Stderr, "Results written to %s\n", filename)
 }

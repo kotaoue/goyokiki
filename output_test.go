@@ -1,8 +1,10 @@
 package main
 
 import (
+	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestGenerateMarkdown_FreeInput(t *testing.T) {
@@ -72,5 +74,33 @@ func TestGenerateMarkdown_Mixed(t *testing.T) {
 	}
 	if !strings.Contains(got, "- [ ] Bad\n") {
 		t.Errorf("missing unselected option: %q", got)
+	}
+}
+
+func TestWriteMarkdownFile(t *testing.T) {
+	answers := []Answer{
+		{
+			Question: Question{Title: "今日やったこと", Type: FreeInput},
+			Value:    "コードを書いた",
+		},
+	}
+	now := time.Date(2026, 2, 21, 13, 25, 33, 0, time.UTC)
+	filename, err := WriteMarkdownFile(answers, now)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer os.Remove(filename)
+
+	if filename != "results-20260221132533.md" {
+		t.Errorf("unexpected filename: %q", filename)
+	}
+
+	content, err := os.ReadFile(filename)
+	if err != nil {
+		t.Fatalf("failed to read file: %v", err)
+	}
+	want := "# 今日やったこと: コードを書いた\n"
+	if string(content) != want {
+		t.Errorf("got %q, want %q", string(content), want)
 	}
 }
