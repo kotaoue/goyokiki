@@ -9,7 +9,7 @@ A simple, prompt-based CLI assistant for periodic notes.
 ## Usage
 
 ```bash
-go run . [config.yaml]
+go run ./cmd/goyokiki [config.yaml]
 ```
 
 If no config file is specified, `config.yaml` in the current directory is used.
@@ -17,7 +17,7 @@ If no config file is specified, `config.yaml` in the current directory is used.
 You can redirect the Markdown output to a file:
 
 ```bash
-go run . example/config.yaml > output.md
+go run ./cmd/goyokiki config.yaml > output.md
 ```
 
 ## Config File Format
@@ -58,5 +58,5 @@ questions:
 ## Build
 
 ```bash
-go build -o goyokiki .
+go build -o goyokiki ./cmd/goyokiki
 ```
