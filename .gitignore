@@ -7,7 +7,7 @@
 *.dll
 *.so
 *.dylib
-goyokiki
+/goyokiki
 
 # Test binary, built with `go test -c`
 *.test
