@@ -1,10 +1,12 @@
-package main
+package config
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/kotaoue/goyokiki/pkg/questions"
 )
 
 func TestLoadConfig_Valid(t *testing.T) {
@@ -32,80 +34,13 @@ func TestLoadConfig_FileNotFound(t *testing.T) {
 	}
 }
 
-func TestLoadQuestions(t *testing.T) {
-	tests := []struct {
-		name      string
-		content   string
-		path      string // if set, used directly instead of a temp file
-		wantErr   bool
-		wantCount int
-	}{
-		{
-			name: "valid",
-			content: `
-questions:
-  - title: "What did you do?"
-    type: free
-  - title: "How do you feel?"
-    type: single
-    options:
-      - Good
-      - Bad
-`,
-			wantCount: 2,
-		},
-		{
-			name:    "file not found",
-			path:    "/nonexistent/path/questions.yaml",
-			wantErr: true,
-		},
-		{
-			name:    "missing title",
-			content: "questions:\n  - type: free\n",
-			wantErr: true,
-		},
-		{
-			name:    "unknown type",
-			content: "questions:\n  - title: \"Q\"\n    type: unknown\n",
-			wantErr: true,
-		},
-		{
-			name:    "single choice no options",
-			content: "questions:\n  - title: \"Q\"\n    type: single\n",
-			wantErr: true,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			p := tc.path
-			if p == "" {
-				p = writeTempFile(t, tc.content)
-			}
-			qcfg, err := LoadQuestions(p)
-			if tc.wantErr {
-				if err == nil {
-					t.Fatal("expected error, got nil")
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if tc.wantCount > 0 && len(qcfg.Questions) != tc.wantCount {
-				t.Errorf("expected %d questions, got %d", tc.wantCount, len(qcfg.Questions))
-			}
-		})
-	}
-}
-
 func TestLoadConfig_WithQuestionFilePath(t *testing.T) {
-	questions := `
+	qs := `
 questions:
   - title: "External question"
     type: free
 `
-	questionPath := writeTempFile(t, questions)
+	questionPath := writeTempFile(t, qs)
 
 	content := fmt.Sprintf(`question_file: %s`, questionPath)
 	cfgPath := writeTempFile(t, content)
@@ -118,7 +53,7 @@ questions:
 		t.Errorf("unexpected question_file: %q", cfg.QuestionFilePath)
 	}
 
-	qcfg, err := LoadQuestions(cfg.QuestionFilePath)
+	qcfg, err := questions.LoadQuestions(cfg.QuestionFilePath)
 	if err != nil {
 		t.Fatalf("unexpected error loading questions: %v", err)
 	}

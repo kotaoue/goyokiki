@@ -1,4 +1,4 @@
-package main
+package prompter
 
 import (
 	"bufio"
@@ -6,11 +6,13 @@ import (
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/kotaoue/goyokiki/pkg/questions"
 )
 
 // Answer holds the user's answer to a question.
 type Answer struct {
-	Question Question
+	Question questions.Question
 	Value    string // selected text or free-text input
 }
 
@@ -26,15 +28,15 @@ func NewPrompter(r io.Reader, w io.Writer) *Prompter {
 }
 
 // Run iterates through all questions, prompts the user, and returns answers.
-func (p *Prompter) Run(questions []Question) ([]Answer, error) {
-	answers := make([]Answer, 0, len(questions))
-	for _, q := range questions {
+func (p *Prompter) Run(qs []questions.Question) ([]Answer, error) {
+	answers := make([]Answer, 0, len(qs))
+	for _, q := range qs {
 		var ans Answer
 		var err error
 		switch q.Type {
-		case FreeInput:
+		case questions.FreeInput:
 			ans, err = p.promptFree(q)
-		case SingleChoice:
+		case questions.SingleChoice:
 			ans, err = p.promptSingle(q)
 		}
 		if err != nil {
@@ -45,7 +47,7 @@ func (p *Prompter) Run(questions []Question) ([]Answer, error) {
 	return answers, nil
 }
 
-func (p *Prompter) promptFree(q Question) (Answer, error) {
+func (p *Prompter) promptFree(q questions.Question) (Answer, error) {
 	fmt.Fprintf(p.out, "%s: ", q.Title)
 	line, err := p.in.ReadString('\n')
 	if err != nil && err != io.EOF {
@@ -54,7 +56,7 @@ func (p *Prompter) promptFree(q Question) (Answer, error) {
 	return Answer{Question: q, Value: strings.TrimRight(line, "\r\n")}, nil
 }
 
-func (p *Prompter) promptSingle(q Question) (Answer, error) {
+func (p *Prompter) promptSingle(q questions.Question) (Answer, error) {
 	fmt.Fprintf(p.out, "%s\n", q.Title)
 	for i, opt := range q.Options {
 		fmt.Fprintf(p.out, "  %d) %s\n", i+1, opt)

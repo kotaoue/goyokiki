@@ -5,6 +5,11 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/kotaoue/goyokiki/pkg/config"
+	"github.com/kotaoue/goyokiki/pkg/output"
+	"github.com/kotaoue/goyokiki/pkg/prompter"
+	"github.com/kotaoue/goyokiki/pkg/questions"
 )
 
 const (
@@ -18,7 +23,7 @@ func main() {
 		configPath = os.Args[1]
 	}
 
-	cfg, err := LoadConfig(configPath)
+	cfg, err := config.LoadConfig(configPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
@@ -29,20 +34,20 @@ func main() {
 		questionPath = defaultQuestionsPath
 	}
 
-	qcfg, err := LoadQuestions(questionPath)
+	qcfg, err := questions.LoadQuestions(questionPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
-	prompter := NewPrompter(os.Stdin, os.Stderr)
-	answers, err := prompter.Run(qcfg.Questions)
+	p := prompter.NewPrompter(os.Stdin, os.Stderr)
+	answers, err := p.Run(qcfg.Questions)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 
-	md := GenerateMarkdown(answers)
+	md := output.GenerateMarkdown(answers)
 
 	if cfg.OutputPath != "" {
 		const outputFileLayout = "20060102_150405" // YYYYMMDD_HHMMSS

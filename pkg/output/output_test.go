@@ -1,16 +1,19 @@
-package main
+package output
 
 import (
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kotaoue/goyokiki/pkg/prompter"
+	"github.com/kotaoue/goyokiki/pkg/questions"
 )
 
 func TestGenerateMarkdown_FreeInput(t *testing.T) {
-	answers := []Answer{
+	answers := []prompter.Answer{
 		{
-			Question: Question{Title: "今日やったこと", Type: FreeInput},
+			Question: questions.Question{Title: "今日やったこと", Type: questions.FreeInput},
 			Value:    "コードを書いた",
 		},
 	}
@@ -22,11 +25,11 @@ func TestGenerateMarkdown_FreeInput(t *testing.T) {
 }
 
 func TestGenerateMarkdown_SingleChoice(t *testing.T) {
-	answers := []Answer{
+	answers := []prompter.Answer{
 		{
-			Question: Question{
+			Question: questions.Question{
 				Title:   "気分はどうですか",
-				Type:    SingleChoice,
+				Type:    questions.SingleChoice,
 				Options: []string{"よい", "ふつう", "わるい"},
 			},
 			Value: "よい",
@@ -48,15 +51,15 @@ func TestGenerateMarkdown_SingleChoice(t *testing.T) {
 }
 
 func TestGenerateMarkdown_Mixed(t *testing.T) {
-	answers := []Answer{
+	answers := []prompter.Answer{
 		{
-			Question: Question{Title: "今日やったこと", Type: FreeInput},
+			Question: questions.Question{Title: "今日やったこと", Type: questions.FreeInput},
 			Value:    "テストを書いた",
 		},
 		{
-			Question: Question{
+			Question: questions.Question{
 				Title:   "気分",
-				Type:    SingleChoice,
+				Type:    questions.SingleChoice,
 				Options: []string{"Good", "Bad"},
 			},
 			Value: "Good",
@@ -78,9 +81,9 @@ func TestGenerateMarkdown_Mixed(t *testing.T) {
 }
 
 func TestWriteMarkdownFile(t *testing.T) {
-	answers := []Answer{
+	answers := []prompter.Answer{
 		{
-			Question: Question{Title: "今日やったこと", Type: FreeInput},
+			Question: questions.Question{Title: "今日やったこと", Type: questions.FreeInput},
 			Value:    "コードを書いた",
 		},
 	}

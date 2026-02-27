@@ -1,16 +1,18 @@
-package main
+package prompter
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/kotaoue/goyokiki/pkg/questions"
 )
 
 func TestPrompter_FreeInput(t *testing.T) {
 	input := "doing some work\n"
-	q := Question{Title: "What did you do?", Type: FreeInput}
+	q := questions.Question{Title: "What did you do?", Type: questions.FreeInput}
 	var sb strings.Builder
 	p := NewPrompter(strings.NewReader(input), &sb)
-	answers, err := p.Run([]Question{q})
+	answers, err := p.Run([]questions.Question{q})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -24,14 +26,14 @@ func TestPrompter_FreeInput(t *testing.T) {
 
 func TestPrompter_SingleChoice(t *testing.T) {
 	input := "2\n"
-	q := Question{
+	q := questions.Question{
 		Title:   "How do you feel?",
-		Type:    SingleChoice,
+		Type:    questions.SingleChoice,
 		Options: []string{"Good", "Bad", "Okay"},
 	}
 	var sb strings.Builder
 	p := NewPrompter(strings.NewReader(input), &sb)
-	answers, err := p.Run([]Question{q})
+	answers, err := p.Run([]questions.Question{q})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -42,14 +44,14 @@ func TestPrompter_SingleChoice(t *testing.T) {
 
 func TestPrompter_SingleChoice_InvalidThenValid(t *testing.T) {
 	input := "0\n5\nabc\n1\n"
-	q := Question{
+	q := questions.Question{
 		Title:   "Pick one",
-		Type:    SingleChoice,
+		Type:    questions.SingleChoice,
 		Options: []string{"A", "B"},
 	}
 	var sb strings.Builder
 	p := NewPrompter(strings.NewReader(input), &sb)
-	answers, err := p.Run([]Question{q})
+	answers, err := p.Run([]questions.Question{q})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
