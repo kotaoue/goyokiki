@@ -1,4 +1,4 @@
-package goyokiki
+package questions
 
 import (
 	"fmt"

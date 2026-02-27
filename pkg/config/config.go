@@ -1,4 +1,4 @@
-package goyokiki
+package config
 
 import (
 	"fmt"
