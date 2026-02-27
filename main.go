@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kotaoue/goyokiki/internal/goyokiki"
+	"github.com/kotaoue/goyokiki/pkg/goyokiki"
 )
 
 const (
