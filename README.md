@@ -2,6 +2,7 @@
 
 [![Go](https://github.com/kotaoue/goyokiki/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/kotaoue/goyokiki/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/kotaoue/goyokiki/branch/main/graph/badge.svg)](https://codecov.io/gh/kotaoue/goyokiki)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kotaoue/goyokiki)](https://goreportcard.com/report/github.com/kotaoue/goyokiki)
 [![License](https://img.shields.io/github/license/kotaoue/goyokiki)](https://github.com/kotaoue/goyokiki/blob/main/LICENSE)
 
 A simple, prompt-based CLI assistant for periodic notes.
