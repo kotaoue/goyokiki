@@ -50,8 +50,13 @@ func main() {
 	md := output.GenerateMarkdown(answers)
 
 	if cfg.OutputPath != "" {
-		const outputFileLayout = "20060102_150405" // YYYYMMDD_HHMMSS
-		filename := time.Now().Format(outputFileLayout) + ".md"
+		var filename string
+		if cfg.OutputFilename != "" {
+			filename = output.ResolveFilename(cfg.OutputFilename, answers) + ".md"
+		} else {
+			const outputFileLayout = "20060102_150405" // YYYYMMDD_HHMMSS
+			filename = time.Now().Format(outputFileLayout) + ".md"
+		}
 		outPath := filepath.Join(cfg.OutputPath, filename)
 		if err := os.WriteFile(outPath, []byte(md), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: failed to write output file: %v\n", err)
