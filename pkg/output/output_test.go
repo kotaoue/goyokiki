@@ -80,6 +80,55 @@ func TestGenerateMarkdown_Mixed(t *testing.T) {
 	}
 }
 
+func TestResolveFilename(t *testing.T) {
+	answers := []prompter.Answer{
+		{
+			Question: questions.Question{Title: "お店", Type: questions.FreeInput},
+			Value:    "TAKAO COFFEE",
+		},
+		{
+			Question: questions.Question{Title: "メニュー名", Type: questions.FreeInput},
+			Value:    "カフェラテ",
+		},
+	}
+
+	tests := []struct {
+		name     string
+		template string
+		want     string
+	}{
+		{
+			name:     "single marker",
+			template: "{ANSWER_1}",
+			want:     "TAKAO COFFEE",
+		},
+		{
+			name:     "two markers",
+			template: "{ANSWER_1}:{ANSWER_2}",
+			want:     "TAKAO COFFEE:カフェラテ",
+		},
+		{
+			name:     "out-of-range marker is left unchanged",
+			template: "{ANSWER_1}:{ANSWER_99}",
+			want:     "TAKAO COFFEE:{ANSWER_99}",
+		},
+		{
+			name:     "no markers",
+			template: "fixed-name",
+			want:     "fixed-name",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ResolveFilename(tt.template, answers)
+			if got != tt.want {
+				t.Errorf("ResolveFilename(%q) = %q, want %q", tt.template, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestWriteMarkdownFile(t *testing.T) {
 	answers := []prompter.Answer{
 		{

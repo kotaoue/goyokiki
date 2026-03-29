@@ -11,6 +11,7 @@ import (
 type Config struct {
 	QuestionFilePath string `yaml:"question_file"`
 	OutputPath       string `yaml:"output_path,omitempty"`
+	OutputFilename   string `yaml:"output_filename,omitempty"`
 }
 
 // LoadConfig reads and parses a YAML config file at the given path.

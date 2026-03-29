@@ -78,6 +78,18 @@ func TestLoadConfig_WithOutputPath(t *testing.T) {
 	}
 }
 
+func TestLoadConfig_WithOutputFilename(t *testing.T) {
+	content := `output_filename: "{ANSWER_1}:{ANSWER_2}"`
+	cfgPath := writeTempFile(t, content)
+	cfg, err := LoadConfig(cfgPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.OutputFilename != "{ANSWER_1}:{ANSWER_2}" {
+		t.Errorf("unexpected output_filename: %q", cfg.OutputFilename)
+	}
+}
+
 func writeTempFile(t *testing.T, content string) string {
 	t.Helper()
 	dir := t.TempDir()

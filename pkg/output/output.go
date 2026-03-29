@@ -34,8 +34,19 @@ func GenerateMarkdown(answers []prompter.Answer) string {
 	return sb.String()
 }
 
+// ResolveFilename replaces {ANSWER_N} markers in the template with the
+// corresponding answer value (1-indexed). Markers with an out-of-range
+// index are left unchanged.
+func ResolveFilename(template string, answers []prompter.Answer) string {
+	result := template
+	for i, a := range answers {
+		marker := fmt.Sprintf("{ANSWER_%d}", i+1)
+		result = strings.ReplaceAll(result, marker, a.Value)
+	}
+	return result
+}
+
 // WriteMarkdownFile writes the Markdown output to a file named results-yyyymmddhhiiss.md.
-// It returns the filename that was written.
 func WriteMarkdownFile(answers []prompter.Answer, now time.Time) (string, error) {
 	filename := fmt.Sprintf("results-%s.md", now.Format("20060102150405"))
 	if err := os.WriteFile(filename, []byte(GenerateMarkdown(answers)), 0644); err != nil {
