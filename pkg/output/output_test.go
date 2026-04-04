@@ -17,8 +17,8 @@ func TestGenerateMarkdown_FreeInput(t *testing.T) {
 			Value:    "コードを書いた",
 		},
 	}
-	got := GenerateMarkdown(answers)
-	want := "# 今日やったこと: コードを書いた\n"
+	got := GenerateMarkdown("テストタイトル", answers)
+	want := "# テストタイトル\n\n- 今日やったこと: コードを書いた\n"
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -35,18 +35,12 @@ func TestGenerateMarkdown_SingleChoice(t *testing.T) {
 			Value: "よい",
 		},
 	}
-	got := GenerateMarkdown(answers)
-	if !strings.Contains(got, "# 気分はどうですか: よい\n") {
-		t.Errorf("missing title line in output: %q", got)
+	got := GenerateMarkdown("テストタイトル", answers)
+	if !strings.Contains(got, "- 気分はどうですか: よい\n") {
+		t.Errorf("missing answer line in output: %q", got)
 	}
-	if !strings.Contains(got, "- [x] よい\n") {
-		t.Errorf("missing selected option in output: %q", got)
-	}
-	if !strings.Contains(got, "- [ ] ふつう\n") {
-		t.Errorf("missing unselected option in output: %q", got)
-	}
-	if !strings.Contains(got, "- [ ] わるい\n") {
-		t.Errorf("missing unselected option in output: %q", got)
+	if strings.Contains(got, "- [x]") || strings.Contains(got, "- [ ]") {
+		t.Errorf("output should not contain checkboxes: %q", got)
 	}
 }
 
@@ -65,18 +59,18 @@ func TestGenerateMarkdown_Mixed(t *testing.T) {
 			Value: "Good",
 		},
 	}
-	got := GenerateMarkdown(answers)
-	if !strings.HasPrefix(got, "# 今日やったこと: テストを書いた\n") {
+	got := GenerateMarkdown("テストタイトル", answers)
+	if !strings.HasPrefix(got, "# テストタイトル\n\n") {
 		t.Errorf("unexpected start of output: %q", got)
 	}
-	if !strings.Contains(got, "# 気分: Good\n") {
-		t.Errorf("missing single-choice title: %q", got)
+	if !strings.Contains(got, "- 今日やったこと: テストを書いた\n") {
+		t.Errorf("missing free input line: %q", got)
 	}
-	if !strings.Contains(got, "- [x] Good\n") {
-		t.Errorf("missing selected option: %q", got)
+	if !strings.Contains(got, "- 気分: Good\n") {
+		t.Errorf("missing single-choice line: %q", got)
 	}
-	if !strings.Contains(got, "- [ ] Bad\n") {
-		t.Errorf("missing unselected option: %q", got)
+	if strings.Contains(got, "- [x]") || strings.Contains(got, "- [ ]") {
+		t.Errorf("output should not contain checkboxes: %q", got)
 	}
 }
 
@@ -151,7 +145,7 @@ func TestWriteMarkdownFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to read file: %v", err)
 	}
-	want := "# 今日やったこと: コードを書いた\n"
+	want := "# results-20260221132533\n\n- 今日やったこと: コードを書いた\n"
 	if string(content) != want {
 		t.Errorf("got %q, want %q", string(content), want)
 	}

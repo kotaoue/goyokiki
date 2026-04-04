@@ -47,17 +47,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	md := output.GenerateMarkdown(answers)
+	var title string
+	if cfg.OutputFilename != "" {
+		title = output.ResolveFilename(cfg.OutputFilename, answers)
+	} else {
+		const outputFileLayout = "20060102_150405" // YYYYMMDD_HHMMSS
+		title = time.Now().Format(outputFileLayout)
+	}
+
+	md := output.GenerateMarkdown(title, answers)
 
 	if cfg.OutputPath != "" {
-		var filename string
-		if cfg.OutputFilename != "" {
-			filename = output.ResolveFilename(cfg.OutputFilename, answers) + ".md"
-		} else {
-			const outputFileLayout = "20060102_150405" // YYYYMMDD_HHMMSS
-			filename = time.Now().Format(outputFileLayout) + ".md"
-		}
-		outPath := filepath.Join(cfg.OutputPath, filename)
+		outPath := filepath.Join(cfg.OutputPath, title+".md")
 		if err := os.WriteFile(outPath, []byte(md), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: failed to write output file: %v\n", err)
 			os.Exit(1)
