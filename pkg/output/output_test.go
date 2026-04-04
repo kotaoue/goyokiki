@@ -123,6 +123,14 @@ func TestResolveFilename(t *testing.T) {
 	}
 }
 
+func TestGenerateMarkdown_Empty(t *testing.T) {
+	got := GenerateMarkdown("空タイトル", nil)
+	want := "# 空タイトル\n\n"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestWriteMarkdownFile(t *testing.T) {
 	answers := []prompter.Answer{
 		{
@@ -148,5 +156,33 @@ func TestWriteMarkdownFile(t *testing.T) {
 	want := "# results-20260221132533\n\n- 今日やったこと: コードを書いた\n"
 	if string(content) != want {
 		t.Errorf("got %q, want %q", string(content), want)
+	}
+}
+
+func TestWriteMarkdownFile_Error(t *testing.T) {
+	// Writing to a path whose parent directory does not exist must return an error.
+	origDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd: %v", err)
+	}
+	// Switch to a read-only temp dir so the write is denied.
+	roDir := t.TempDir()
+	if err := os.Chmod(roDir, 0555); err != nil {
+		t.Fatalf("chmod: %v", err)
+	}
+	if err := os.Chdir(roDir); err != nil {
+		t.Fatalf("chdir: %v", err)
+	}
+	defer func() { _ = os.Chdir(origDir) }()
+
+	answers := []prompter.Answer{
+		{
+			Question: questions.Question{Title: "テスト", Type: questions.FreeInput},
+			Value:    "値",
+		},
+	}
+	_, writeErr := WriteMarkdownFile(answers, time.Now())
+	if writeErr == nil {
+		t.Error("expected an error when writing to a read-only directory, got nil")
 	}
 }
