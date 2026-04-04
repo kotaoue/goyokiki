@@ -51,13 +51,13 @@ questions:
 
 ## Markdown Output Format
 
-```markdown
-# 今日やったこと: コードを書いた
+The output has a single top-level heading (derived from the output filename template or a timestamp) followed by a flat bullet list of all answers.
 
-# 気分はどうですか: よい
-- [x] よい
-- [ ] ふつう
-- [ ] わるい
+```markdown
+# 20260102_150405
+
+- 今日やったこと: コードを書いた
+- 気分はどうですか: よい
 ```
 
 ## Build

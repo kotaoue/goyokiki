@@ -47,17 +47,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	md := output.GenerateMarkdown(answers)
+	title := resolveTitle(cfg.OutputFilename, answers, time.Now())
+	md := output.GenerateMarkdown(title, answers)
 
 	if cfg.OutputPath != "" {
-		var filename string
-		if cfg.OutputFilename != "" {
-			filename = output.ResolveFilename(cfg.OutputFilename, answers) + ".md"
-		} else {
-			const outputFileLayout = "20060102_150405" // YYYYMMDD_HHMMSS
-			filename = time.Now().Format(outputFileLayout) + ".md"
-		}
-		outPath := filepath.Join(cfg.OutputPath, filename)
+		outPath := filepath.Join(cfg.OutputPath, title+".md")
 		if err := os.WriteFile(outPath, []byte(md), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error: failed to write output file: %v\n", err)
 			os.Exit(1)
@@ -67,4 +61,16 @@ func main() {
 	}
 
 	fmt.Print(md)
+}
+
+const outputFileLayout = "20060102_150405" // YYYYMMDD_HHMMSS
+
+// resolveTitle returns the document title (and filename stem) for the output.
+// If outputFilename is non-empty it is expanded with ResolveFilename; otherwise
+// a timestamp formatted as YYYYMMDD_HHMMSS is used.
+func resolveTitle(outputFilename string, answers []prompter.Answer, now time.Time) string {
+	if outputFilename != "" {
+		return output.ResolveFilename(outputFilename, answers)
+	}
+	return now.Format(outputFileLayout)
 }
